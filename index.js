@@ -17,4 +17,4 @@ app.listen(port,()=>{
     console.log(`it is listening at ${port}`);
 })
 
-connectToMongo("mongodb://localhost:27017/triallogin");
+connectToMongo("mongodb+srv://dlnpriyanshu:Aforapple123@mediabook.pyd0tra.mongodb.net/trial");
