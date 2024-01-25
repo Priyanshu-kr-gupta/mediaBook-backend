@@ -1,4 +1,5 @@
 const express=require('express');
+require("dotenv").config();
 var cors=require('cors')
 const bodyParser=require("body-parser")
 const app=express();
@@ -17,4 +18,4 @@ app.listen(port,()=>{
     console.log(`it is listening at ${port}`);
 })
 
-connectToMongo("mongodb+srv://dlnpriyanshu:Aforapple123@mediabook.pyd0tra.mongodb.net/trial");
+connectToMongo(process.env.dburl);
