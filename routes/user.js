@@ -20,14 +20,15 @@ router.post('/searchUser',async (req,res)=>{
 })
 
 router.post('/getSearchedUser',async (req,res)=>{
+    console.log("sjfns")
     try {
-         const userId=req.user.id;
+         const userId=req.body.searchUser;
         const user= await User.findById(userId).select("-password")
         res.json(user)
         console.log(user)
     } catch (error) {
         console.error(error.message)
-        res.status(500).send({msg:"Internal Server Error"})
+        res.status(500).send({msg:"Internal Server apple Error"})
     }
 })
 
