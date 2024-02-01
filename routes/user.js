@@ -5,7 +5,9 @@ const tempUser= require('../models/tempUser');
 const bcrypt= require('bcryptjs');
 const jwt=require('jsonwebtoken');
 const JWT_SECRET="mediaBook-2.O";
-
+const Connections = require("../models/connections")
+const fetchuser = require("../middleware/fetchuser");
+const { connect, connections, connection } = require('mongoose');
 router.post('/searchUser',async (req,res)=>{
   
     // let user=await User.findOne({name:req.body.searchedUser})
@@ -20,9 +22,6 @@ router.post('/searchUser',async (req,res)=>{
 })
 
 router.post('/getSearchedUser',async (req,res)=>{
-    // console.log("i am called")
-    // console.log(req.body.id)
-    // console.log(req.body.suserid)
     try {
          const userId=req.body.id;
         const user= await User.findById({_id:userId},{password:0})
@@ -32,6 +31,25 @@ router.post('/getSearchedUser',async (req,res)=>{
     } catch (error) {
         console.error(error.message)
         res.status(500).send({msg:"Internal Server Error"})
+    }
+})
+
+router.post('/connect',fetchuser,async(req,res)=>{
+    try{
+        const sender=req.user.id;
+        const receiver=req.body.receiver;
+        connection=await new Connections({
+            sender,
+            receiver
+        }) 
+        connection.save().then(()=>{
+            res.json({msg:"req sended"})
+        })
+               
+    }
+    catch{
+        res.status(500).send({msg:"Internal Server Error"})
+
     }
 })
 
