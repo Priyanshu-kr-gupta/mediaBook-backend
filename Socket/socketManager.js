@@ -8,7 +8,7 @@ const SocketManager = (server) =>
     const socketIO = require("socket.io")
     const io = socketIO(server, {
         cors: {
-          origin: "https://media-book-frontend-two.vercel.app", 
+          origin: "*", 
           methods: ["GET", "POST"]
         }
       });
