@@ -7,6 +7,7 @@ const JWT_SECRET="mediaBook-2.O";
 const Connections = require("../models/connections")
 const fetchuser = require("../middleware/fetchuser");
 const connections = require('../models/connections');
+const notification = require('../models/notification');
 router.post('/searchUser',async (req,res)=>{
   
     let user = await User.find({ name: { $regex: new RegExp(req.body.searchedUser, 'i') } },{bgPhoto:0,password:0});
@@ -99,6 +100,22 @@ router.post('/getConnections',fetchuser,async (req,res)=>{
                 
     }));
     res.json({allConnections});
+}
+)
+router.post('/getNotifications',fetchuser,async (req,res)=>{
+    const userId=req.user.id;
+    
+    const result = await notification.find({reciever: userId});
+// console.log(result)
+res.json(result)
+}
+)
+router.post('/getNotificationsCnt',fetchuser,async (req,res)=>{
+    const userId=req.user.id;
+    
+    const result = await notification.find({reciever: userId});
+// res.json(result.size())
+res.json(result.length);
 }
 )
 

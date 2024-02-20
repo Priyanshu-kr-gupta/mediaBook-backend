@@ -140,7 +140,7 @@ router.post('/loginUser',async (req,res)=>{
             }
         }
             const authToken =jwt.sign(data,JWT_SECRET);
-            res.json({authToken,login,msg:"Successfully Login"})
+            res.json({authToken,login,msg:"Successfully Login",user_Id:user.id})
         
     } catch (error) {
         console.log(error.message)
@@ -149,14 +149,14 @@ router.post('/loginUser',async (req,res)=>{
 })
 
 
-router.post("/message", async (req, res) => {
-    try {
-      console.log("Its working")
-      res.json("its working")
-    } catch (error) {
-      res.status(404).send({ error: "No msg found" });
-    }
-  });
+// router.post("/message", async (req, res) => {
+//     try {
+//       console.log("Its working")
+//       res.json("its working")
+//     } catch (error) {
+//       res.status(404).send({ error: "No msg found" });
+//     }
+//   });
 
 
 //Route3: Get logged in user details using : POST "api/auth/getUser". Login Required

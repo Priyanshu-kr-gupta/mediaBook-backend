@@ -1,83 +1,21 @@
-// const fetchuser = require("../middleware/fetchuser");
-// const jwt = require("jsonwebtoken");
-// const JWT_SECRET = "mediaBook-2.O";
-// const data = jwt.verify(localStorage.getItem("auth-token"), JWT_SECRET);
-// const onlineUsers =[];
-// const onlineUsersId =[];
-// const SocketManager = (server) =>
-// {
-//     const socketIO = require("socket.io")
-//     const io = socketIO(server, {
-//         cors: {
-//           origin: "http://localhost:3000", 
-//           methods: ["GET", "POST"]
-//         }
-//       });
-
-    // io.on('connection', (socket) => {
-        // console.log('A user connected',socket.id);
-  
-    // const authToken = socket.handshake.auth.token;
-    // if (authToken) {
-        // try {
-            // const decoded = jwt.verify(authToken, JWT_SECRET);
-            // const userId = decoded.user.id;
-            // onlineUsers.push({id:userId,socketId:socket.id})
-            // onlineUsersId.push(userId)
-            // console.log(onlineUsers)
-            
-            // io.emit('newUser', onlineUsersId);
-        // } catch (error) {
-            // console.error('Error verifying JWT token:', error.message);
-        // }
-    // } else {
-        // console.error('No authentication token provided.');
-    // }
-    // socket.on("logoutUser",()=>{        
-    //     const indexToRemove = onlineUsers.findIndex(obj => obj.socketId === socket.id);
-    //     if (indexToRemove !== -1) {
-    //         onlineUsers.splice(indexToRemove, 1);
-    //         onlineUsersId.splice(indexToRemove,1)    
-    //         io.emit('newUser', onlineUsersId);
-    //     }
-    //     })
-        // socket.on('disconnect', () => {
-            // console.log('User disconnected');
-            // const indexToRemove = onlineUsers.findIndex(obj => obj.socketId === socket.id);
-            // if (indexToRemove !== -1) {
-                // onlineUsers.splice(indexToRemove, 1);
-                // onlineUsersId.splice(indexToRemove,1)    
-                // console.log(onlineUsers)
-                // io.emit('newUser', onlineUsersId);
-    // }
-        // });
-
-
-
-
-
-
-
-        //global chat socket connections 
-
-        // socket.on()
-    // });
-// }
-// module.exports = SocketManager
-
-
-
-
-
 const jwt = require("jsonwebtoken");
 const socketIO = require("socket.io");
 const JWT_SECRET = "mediaBook-2.O";
 const onlineUsers = [];
 const onlineUsersId = [];
+const Notification = require("../models/notification")
+const User= require('../models/User');
 
-let io; // Declare io outside so it can be accessed globally
-let socket; // Declare socket outside so it can be accessed globally
+let io; 
+let socket; 
 const SocketManager = (server) => {
+
+    const notification = async(senderId,recieverId,msg,src)=>{
+        const noti=new Notification({
+            sender:senderId,reciever:recieverId,message:msg,source:src
+        })
+        const savednoti= await noti.save();
+    }
     io = socketIO(server, {
         cors: {
             origin: "http://localhost:3000",
@@ -85,33 +23,61 @@ const SocketManager = (server) => {
         }
     });
 
-    io.on("connection", (sock) => {
+    io.on("connection", async (sock) => {
         // console.log("A user connected");
 
         socket = sock; 
 
-        // Handle authentication using JWT
         const authToken = socket.handshake.auth.token;
         // console.log(authToken)
         try {
             const decoded = jwt.verify(authToken, JWT_SECRET);
             const userId = decoded.user.id;
-            // console.log(decoded)
-            // console.log(userId)
-            // onlineUsers.push({ userId, socketId: socket.id });
-            // onlineUsersId.push(socket.id);
+           const res= await User.updateOne({_id: userId},{
+                $set: {
+                  status:"1",
+                }
+            }
+        )
+            io.emit("newUser",userId);
+            
             socket.on("newChatUser",(room)=>{
                 socket.join(room);
-                // console.log(`Socket ${userId} joined room ${room}`);
                 io.emit("newChatUser",userId);
             })
             socket.on("sendMessage",(room,mes)=>{
                 io.to(room).emit("newMessage",{msg:mes,s:0});
             })
+        
+
+
+
+            //notification
+
+            socket.on("connectionRequest",async (rec)=>{
+                notification(userId,rec,"you receive a friend request","http://localhost:3000/search");
+                io.emit("newNotification",rec);
+
+            })
+            socket.on("acceptConnectionRequest",async (rec)=>{
+                notification(userId,rec,userId+" Accepted your request",`http://localhost:3000/user/${userId}`);
+                io.emit("newNotification",rec);
+
+            })
 
 
 
 
+            socket.on("disconnect", async() => {
+                
+                const res= await User.updateOne({_id: userId},{
+                    $set: {
+                        status:"0",
+                    }
+                }
+                )
+                io.emit("leaveUser",userId);
+            });
         } catch (error) {
             console.error("Authentication failed:", error.message);
             socket.disconnect(true);
