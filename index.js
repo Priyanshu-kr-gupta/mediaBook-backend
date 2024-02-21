@@ -7,7 +7,7 @@
   const app=express();
   app.use(
     cors({
-      origin: [`http://localhost:3000`,`https://media-book-frontend-two.vercel.app`],
+      origin: ['http://localhost:3000',`https://media-book-frontend-two.vercel.app`],
       methods: "POST ,PUT ,GET ,DELETE,HEAD",
       credentials: true,
     })
