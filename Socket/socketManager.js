@@ -48,6 +48,9 @@ const SocketManager = (server) => {
             socket.on("sendMessage",(room,mes)=>{
                 io.to(room).emit("newMessage",{msg:mes,s:0});
             })
+            socket.on("likeUpdate",(postId,update)=>{
+                io.emit("likeUpdate",postId,update,userId);
+            })
         
 
 
