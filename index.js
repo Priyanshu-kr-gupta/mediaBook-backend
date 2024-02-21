@@ -5,6 +5,13 @@
   const cors=require('cors')
   const bodyParser=require("body-parser")
   const app=express();
+  app.use(
+    cors({
+      origin: [`http://localhost:3000`,`https://media-book-frontend-two.vercel.app`],
+      methods: "POST ,PUT ,GET ,DELETE,HEAD",
+      credentials: true,
+    })
+  );
   app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
   app.use(express.json({limit: '50mb'}))
   app.use(express.json());
@@ -14,7 +21,7 @@
   SocketManager(server)
   const port=process.env.port || 5000;
   const connectToMongo=require('./dbConnect/db');
- 
+
   // app.use(cors({
   //   origin: "http://localhost:3000",
   //   methods: ["GET", "POST","PUT"]
@@ -29,13 +36,7 @@
   //     console.log(`it is listening at ${port}`);
   // })
 
-  app.use(
-    cors({
-      origin: [`http://localhost:3000`,`https://media-book-frontend-two.vercel.app`],
-      methods: "POST ,PUT ,GET ,DELETE,HEAD",
-      credentials: true,
-    })
-  );
+ 
 
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
