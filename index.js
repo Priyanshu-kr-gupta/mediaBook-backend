@@ -1,22 +1,34 @@
-  const express=require('express');
+  const connectToMongo=require('./dbConnect/db');
+const express=require('express');
+ const cors=require('cors')
+ require("dotenv").config();
+ const bodyParser=require("body-parser")
+
+  connectToMongo(process.env.dburl);
+
+  const app=express();
+  const port=process.env.port || 5000;
+
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.json({ limit: '50mb', extended: true }))
+app.use(express.json())
+app.use(
+  cors()
+);
+
   const http = require("http")
   const socketIO = require("socket.io")
-  require("dotenv").config();
-  const cors=require('cors')
-  app.use(cors());
-  const bodyParser=require("body-parser")
-  const app=express();
-  app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
-  app.use(express.json({limit: '50mb'}))
+ 
+ 
+ 
 
-  app.use(express.json());
+
   const server = http.createServer(app);
   const {SocketManager} = require('./Socket/socketManager')
   const {GlobalChatSocketManager}=require('./Socket/GlobalChatSocketManager')
   SocketManager(server)
-  const port=process.env.port || 5000;
-  const connectToMongo=require('./dbConnect/db');
- 
+
+
   // app.use(cors({
   //   origin: "http://localhost:3000",
   //   methods: ["GET", "POST","PUT"]
@@ -35,4 +47,4 @@
   server.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
-  connectToMongo(process.env.dburl);
+
