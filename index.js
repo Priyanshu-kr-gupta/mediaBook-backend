@@ -15,6 +15,12 @@ app.use(express.json())
 app.use(
   cors()
 );
+app.use(cors({
+  origin: "https://media-book-frontend-two.vercel.app",
+  methods: ["GET", "POST", "PUT"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
 
   const http = require("http")
   const socketIO = require("socket.io")
