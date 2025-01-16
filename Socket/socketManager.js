@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const socketIO = require("socket.io");
 const JWT_SECRET = "mediaBook-2.O";
 const onlineUsers = [];
-const onlineUsersId = [];
 const Notification = require("../models/notification")
 const User= require('../models/User');
 
@@ -11,10 +10,14 @@ let socket;
 const SocketManager = (server) => {
 
     const notification = async(senderId,recieverId,msg,src)=>{
-        const noti=new Notification({
-            sender:senderId,reciever:recieverId,message:msg,source:src
-        })
-        const savednoti= await noti.save();
+        if(senderId!==recieverId)
+        {
+
+            const noti=new Notification({
+                sender:senderId,reciever:recieverId,message:msg,source:src
+            })
+            const savednoti= await noti.save();
+        }
     }
     io = socketIO(server, {
         cors: {
@@ -41,21 +44,33 @@ const SocketManager = (server) => {
         )
             io.emit("newUser",userId);
             
+            socket.on("newuser",(id)=>{
+               io.emit("newUser",id);
+
+            })
+            
             socket.on("newChatUser",(room)=>{
                 socket.join(room);
                 io.emit("newChatUser",userId);
             })
             socket.on("sendMessage",(room,mes)=>{
+                // console.log(mes)
                 io.to(room).emit("newMessage",{msg:mes,s:0});
             })
-            socket.on("likeUpdate",(postId,update)=>{
+            socket.on("likeUpdate",(postId,update,rec)=>{
+                io.emit("newNotification",rec,userId);
                 io.emit("likeUpdate",postId,update,userId);
+                if(update==1)
+                    notification(userId,rec,"Liked your post",`http://localhost:3000/post/${postId}`);
+                else
+                    notification(userId,rec,"UnLiked your post",`http://localhost:3000/post/${postId}`);
+
             })
         
 
 
 
-            //notification
+            //notifications
 
             socket.on("connectionRequest",async (rec)=>{
                 notification(userId,rec,"you receive a friend request","http://localhost:3000/search");
@@ -68,7 +83,12 @@ const SocketManager = (server) => {
 
             })
 
+            socket.on("newcomment",async (postId,rec)=>{
+                notification(userId,rec,"Commented on your post",`http://localhost:3000/post/${postId}`);
+                io.emit("newNotification",rec,userId);
 
+
+            })
 
 
             socket.on("disconnect", async() => {
@@ -81,6 +101,18 @@ const SocketManager = (server) => {
                 )
                 io.emit("leaveUser",userId);
             });
+        
+            socket.on("logoutuser", async() => {
+               
+                const res= await User.updateOne({_id: userId},{
+                    $set: {
+                        status:"0",
+                    }
+                }
+                )
+                io.emit("leaveUser",userId);
+            });
+            
         } catch (error) {
             console.error("Authentication failed:", error.message);
             socket.disconnect(true);

@@ -17,6 +17,15 @@ router.post('/searchUser',async (req,res)=>{
     else
     res.json({msg:"no such user exists"});  
 })
+router.post('/searchCommentUser',async (req,res)=>{
+    const userId=req.body.id;
+    let user = await User.find({_id:userId},{profilePhoto:0,bgPhoto:0,password:0});
+    if(user){
+        res.json({user});
+    }
+    else
+    res.json({msg:"no such user exists"});  
+})
 
 router.post('/getSearchedUser',async (req,res)=>{
     try {
@@ -113,7 +122,7 @@ res.json(result)
 router.post('/getNotificationsCnt',fetchuser,async (req,res)=>{
     const userId=req.user.id;
     
-    const result = await notification.find({reciever: userId});
+    const result = await notification.find({reciever: userId}).sort({date:1});
 // res.json(result.size())
 res.json(result.length);
 }

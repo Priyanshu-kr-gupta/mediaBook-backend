@@ -1,8 +1,8 @@
   const express=require('express');
+  const cors=require('cors')
   const http = require("http")
   const socketIO = require("socket.io")
   require("dotenv").config();
-  const cors=require('cors')
   const bodyParser=require("body-parser")
   const app=express();
   app.use(
@@ -10,6 +10,7 @@
       origin: ['http://localhost:3000',`https://media-book-frontend-two.vercel.app`],
       methods: "POST ,PUT ,GET ,DELETE,HEAD",
       credentials: true,
+      optionsSuccessStatus: 204, 
     })
   );
   app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
